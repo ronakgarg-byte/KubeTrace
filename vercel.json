@@ -3,10 +3,6 @@
     {
       "source": "/api/(.*)",
       "destination": "/main.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/main.py"
     }
   ]
 }
