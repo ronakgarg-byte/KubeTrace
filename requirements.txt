@@ -1,0 +1,6 @@
+# Dependencies for CY-05 Kubernetes RBAC Privilege Path Analyzer
+pyyaml>=6.0.2
+
+# Note: Graph construction and traversal utilize Python standard library
+# dataclasses, dictionaries, and visited-set tracking for zero-dependency,
+# cycle-safe execution and fast minimal-remediation validation.

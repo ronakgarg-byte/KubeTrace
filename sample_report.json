@@ -1,0 +1,91 @@
+{
+  "summary": {
+    "total_paths_detected": 4,
+    "unique_source_principals": 4,
+    "primitive_breakdown": {
+      "Binding escalation": 1,
+      "Impersonation": 1,
+      "Pod/service-account escalation": 1,
+      "Service-account credential access": 1
+    }
+  },
+  "paths": [
+    {
+      "source_principal": "system:serviceaccount:default:sa0",
+      "traversed_objects": [
+        "bind0",
+        "r2",
+        "r9"
+      ],
+      "escalation_primitive": "Binding escalation",
+      "terminal_capability": "administrator-equivalent: verbs: ['*'], resources: ['*']",
+      "remediation": {
+        "action": "remove_verb",
+        "target_kind": "ClusterRole",
+        "target_name": "r2",
+        "description": "Remove verb 'bind' from rule #1 in ClusterRole 'r2'",
+        "validated": true,
+        "rule_index": 1,
+        "verb": "bind"
+      }
+    },
+    {
+      "source_principal": "system:serviceaccount:default:sa1",
+      "traversed_objects": [
+        "bind1",
+        "r3",
+        "sa7"
+      ],
+      "escalation_primitive": "Impersonation",
+      "terminal_capability": "administrator-equivalent: verbs: ['*'], resources: ['*']",
+      "remediation": {
+        "action": "remove_verb",
+        "target_kind": "Role",
+        "target_name": "r3",
+        "description": "Remove verb 'impersonate' from rule #0 in Role 'r3'",
+        "validated": true,
+        "rule_index": 0,
+        "verb": "impersonate"
+      }
+    },
+    {
+      "source_principal": "system:serviceaccount:default:sa2",
+      "traversed_objects": [
+        "bind2",
+        "r4",
+        "sa7"
+      ],
+      "escalation_primitive": "Pod/service-account escalation",
+      "terminal_capability": "administrator-equivalent: verbs: ['*'], resources: ['*']",
+      "remediation": {
+        "action": "remove_verb",
+        "target_kind": "Role",
+        "target_name": "r4",
+        "description": "Remove verb 'create' from rule #0 in Role 'r4'",
+        "validated": true,
+        "rule_index": 0,
+        "verb": "create"
+      }
+    },
+    {
+      "source_principal": "system:serviceaccount:default:sa3",
+      "traversed_objects": [
+        "bind3",
+        "r5",
+        "sa7-token",
+        "sa7"
+      ],
+      "escalation_primitive": "Service-account credential access",
+      "terminal_capability": "administrator-equivalent: verbs: ['*'], resources: ['*']",
+      "remediation": {
+        "action": "remove_verb",
+        "target_kind": "Role",
+        "target_name": "r5",
+        "description": "Remove verb 'get' from rule #0 in Role 'r5'",
+        "validated": true,
+        "rule_index": 0,
+        "verb": "get"
+      }
+    }
+  ]
+}

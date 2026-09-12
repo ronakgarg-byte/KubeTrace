@@ -1,0 +1,258 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa7
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa0
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa1
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa2
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa3
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa4
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa5
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa6
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: r9
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bind13
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: r9
+subjects:
+  - kind: ServiceAccount
+    name: sa7
+    namespace: default
+---
+# sa0 -> Binding escalation
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: r2
+rules:
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterrolebindings"]
+    verbs: ["create"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles"]
+    verbs: ["bind"]
+    resourceNames: ["r9"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bind0
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: r2
+subjects:
+  - kind: ServiceAccount
+    name: sa0
+    namespace: default
+---
+# sa1 -> Impersonation
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: r3
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["impersonate"]
+    resourceNames: ["sa7"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind1
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: r3
+subjects:
+  - kind: ServiceAccount
+    name: sa1
+    namespace: default
+---
+# sa2 -> Pod/SA escalation
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: r4
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind2
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: r4
+subjects:
+  - kind: ServiceAccount
+    name: sa2
+    namespace: default
+---
+# sa3 -> Credential access
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sa7-token
+  namespace: default
+  annotations:
+    kubernetes.io/service-account.name: sa7
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: r5
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+    resourceNames: ["sa7-token"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind3
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: r5
+subjects:
+  - kind: ServiceAccount
+    name: sa3
+    namespace: default
+---
+# sa4 <-> sa5 Mutual impersonation cycle
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: r6
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["impersonate"]
+    resourceNames: ["sa5"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind4
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: r6
+subjects:
+  - kind: ServiceAccount
+    name: sa4
+    namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: r7
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["impersonate"]
+    resourceNames: ["sa4"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind5
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: r7
+subjects:
+  - kind: ServiceAccount
+    name: sa5
+    namespace: default
+---
+# sa6 Benign
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: r8
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind6
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: r8
+subjects:
+  - kind: ServiceAccount
+    name: sa6
+    namespace: default
